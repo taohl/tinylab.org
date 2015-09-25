@@ -1,0 +1,21 @@
+#!/bin/bash
+#
+# publish -- to the internet
+#
+
+TOP_DIR=$(dirname `readlink -f $0`)
+
+START=HEAD^^
+END=HEAD
+
+publish=$TOP_DIR/../publish/
+length=300
+
+for i in `git rev-list $START...$END | xargs -i git whatchanged {} | grep " A\s" | cut -d 'A' -f2 | grep "_posts/.*.md$" | tr -d '\t'`
+do
+    name=`echo $i | sed -e "s#_posts/##g"`
+
+    echo $name
+    sed -n -e "/---/,/---/p" $i > $publish/$name
+    sed -e '/---/,/---/d;/>/,/##/d' $i | head -c $length | tr -d '\n' | tr -s ' ' >> $publish/$name
+done
